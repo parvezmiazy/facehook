@@ -2,22 +2,28 @@ import { useRef } from "react";
 import EditIcon from "../../assets/icons/edit.svg";
 import useAxios from "../../hooks/useAxios";
 import { useProfile } from "../../hooks/useProfile";
+
+import { actions } from "../../actions";
+
 const ProfileImage = () => {
   const { state, dispatch } = useProfile();
   const { api } = useAxios();
-  const fileUploadRef = useRef();
+  const fileUploaderRef = useRef();
 
   const handleImageUpload = (event) => {
     event.preventDefault();
-    fileUploadRef.current.addeventListener("change", updateImageDisplay);
-    fileUploadRef.current.click();
+
+    fileUploaderRef.current.addEventListener("change", updateImageDisplay);
+    fileUploaderRef.current.click();
   };
+
   const updateImageDisplay = async () => {
     try {
       const formData = new FormData();
-      for (const file of fileUploadRef.current.files) {
+      for (const file of fileUploaderRef.current.files) {
         formData.append("avatar", file);
       }
+
       const response = await api.post(
         `${import.meta.env.VITE_SERVER_BASE_URL}/profile/${
           state?.user?.id
@@ -25,13 +31,15 @@ const ProfileImage = () => {
         formData
       );
       if (response.status === 200) {
-        dispatch({ type: actions.profile.IMAGE_UPDATED, data: response.data });
+        dispatch({
+          type: actions.profile.IMAGE_UPDATED,
+          data: response.data,
+        });
       }
     } catch (error) {
-      console.error(error);
       dispatch({
         type: actions.profile.DATA_FETCH_ERROR,
-        error: error.message,
+        error: err.message,
       });
     }
   };
@@ -44,14 +52,15 @@ const ProfileImage = () => {
         alt={state?.user?.firstName}
       />
 
-      <form>
+      <form id="form" encType="multipart/form-data">
         <button
           className="flex-center absolute bottom-4 right-4 h-7 w-7 rounded-full bg-black/50 hover:bg-black/80"
           onClick={handleImageUpload}
+          type="submit"
         >
           <img src={EditIcon} alt="Edit" />
         </button>
-        <input id="file" type="file" ref={fileUploadRef} hidden />
+        <input id="file" type="file" ref={fileUploaderRef} hidden />
       </form>
     </div>
   );

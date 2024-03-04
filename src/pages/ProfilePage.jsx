@@ -16,7 +16,6 @@ const ProfilePage = () => {
   const { auth } = useAuth();
 
   useEffect(() => {
-    setLoading(true);
     dispatch({ type: actions.profile.DATA_FETCHING });
     const fetchProfile = async () => {
       try {
