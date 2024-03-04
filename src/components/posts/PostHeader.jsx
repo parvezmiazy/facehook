@@ -5,7 +5,7 @@ import DeleteIcon from "../../assets/icons/delete.svg";
 import EditIcon from "../../assets/icons/edit.svg";
 import TimeIcon from "../../assets/icons/time.svg";
 import { useAvatar } from "../../hooks/useAvatar";
-
+import { getDateDifferenceFromNow } from "../../utils/index";
 const PostHeader = ({ post }) => {
   const [showAction, setShowAction] = useState(false);
   const { avatarURL } = useAvatar(post);
