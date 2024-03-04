@@ -5,8 +5,9 @@ import { useAuth } from "./useAuth";
 
 const useAxios = () => {
   const { auth, setAuth } = useAuth();
+
   useEffect(() => {
-    // add a request intercepter
+    // Add a request interceptor
     const requestIntercept = api.interceptors.request.use(
       (config) => {
         const authToken = auth?.authToken;
@@ -15,16 +16,17 @@ const useAxios = () => {
         }
         return config;
       },
-
       (error) => Promise.reject(error)
     );
 
-    // add a response intercepter
-
+    // Add a response interceptor
     const responseIntercept = api.interceptors.response.use(
       (response) => response,
       async (error) => {
         const originalRequest = error.config;
+
+        // If the error status is 401 and there is no originalRequest._retry flag,
+        // it means the token has expired and we need to refresh it
         if (error.response.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
 
@@ -35,15 +37,18 @@ const useAxios = () => {
               { refreshToken }
             );
             const { token } = response.data;
+
             console.log(`New Token: ${token}`);
             setAuth({ ...auth, authToken: token });
-            originalRequest.headers.Authorization = `Bearer ${authToken}`;
 
+            // Retry the original request with the new token
+            originalRequest.headers.Authorization = `Bearer ${token}`;
             return axios(originalRequest);
           } catch (error) {
             throw error;
           }
         }
+
         return Promise.reject(error);
       }
     );
